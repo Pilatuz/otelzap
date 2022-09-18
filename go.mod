@@ -3,6 +3,7 @@ module github.com/Pilatuz/otelzap
 go 1.18
 
 require (
+	github.com/golang/mock v1.6.0
 	github.com/stretchr/testify v1.8.0
 	go.opentelemetry.io/otel v1.10.0
 	go.opentelemetry.io/otel/trace v1.10.0
@@ -10,6 +11,7 @@ require (
 )
 
 require (
+	github.com/benbjohnson/clock v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	go.uber.org/atomic v1.7.0 // indirect

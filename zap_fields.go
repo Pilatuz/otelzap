@@ -11,31 +11,38 @@ import (
 	"time"
 
 	"go.opentelemetry.io/otel/attribute"
-	"go.opentelemetry.io/otel/trace"
 	"go.uber.org/zap/zapcore"
 )
 
-// attributesFromZapFields converts multiple ZAP fields into OpenTelemetry WithAttributes() option.
-func attributesFromZapFields(with []zapcore.Field, fields []zapcore.Field, extra ...attribute.KeyValue) trace.EventOption {
+// attributesFromZapFields converts multiple ZAP fields into OpenTelemetry attributes.
+func attributesFromZapFields(
+	with []zapcore.Field,
+	fields []zapcore.Field,
+	extra ...attribute.KeyValue,
+) []attribute.KeyValue {
 	if len(with)+len(fields) == 0 {
 		// no fields, use extra attributes only
-		return trace.WithAttributes(extra...)
+		return extra
 	}
 
-	// convert each ZAP field
+	// convert each ZAP field...
 	attrs := make([]attribute.KeyValue, 0, len(with)+len(fields)+len(extra))
 	attrs = append(attrs, extra...) // use extra "as is"
+
+	// convert "with" fields first
 	for _, field := range with {
 		attrs = appendZapField(attrs, field)
 	}
+
+	// then rest of fields
 	for _, field := range fields {
 		attrs = appendZapField(attrs, field)
 	}
 
-	return trace.WithAttributes(attrs...)
+	return attrs
 }
 
-// appendZapField converts and append ZAP field.
+// appendZapField converts and appends a ZAP field.
 func appendZapField(attributes []attribute.KeyValue, field zapcore.Field) []attribute.KeyValue {
 	switch field.Type {
 	case zapcore.SkipType, // see zap.Skip()
@@ -92,14 +99,14 @@ func appendZapField(attributes []attribute.KeyValue, field zapcore.Field) []attr
 		zapcore.ArrayMarshalerType,  // see zap.Strings(), zap.Int64s(), ...
 		zapcore.ObjectMarshalerType, // see zap.Object()
 		zapcore.InlineMarshalerType: // see zap.Inline()
-		break // return append(attributes, anyAttr(field.Key, field.Interface))
+		break // return append(attributes, Any(field.Key, field.Interface))
 	}
 
-	return append(attributes, anyAttr(field.Key, field.Interface))
+	return append(attributes, Any(field.Key, field.Interface))
 }
 
-// anyAttr converts unknown type to OpenTelemetry attribute likely as JSON value.
-func anyAttr(key string, value interface{}) attribute.KeyValue {
+// Any converts unknown type to OpenTelemetry attribute, probably as JSON value.
+func Any(key string, value interface{}) attribute.KeyValue {
 	switch t := value.(type) {
 	case nil:
 		return attribute.String(key, "<nil>")
@@ -248,5 +255,22 @@ func toStringSlice(rv reflect.Value) []string {
 		re := rv.Index(i)
 		out[i] = re.String()
 	}
+	return out
+}
+
+// concatFields concatenates two set of fields.
+func concatFields(a []zapcore.Field, b []zapcore.Field) []zapcore.Field {
+	if len(a) == 0 {
+		return b // first set is empty, return second one
+	}
+	if len(b) == 0 {
+		return a // second set is empty, return first one
+	}
+
+	// concatenate both non-empty sets
+	out := make([]zapcore.Field, 0, len(a)+len(b))
+	out = append(out, a...)
+	out = append(out, b...)
+
 	return out
 }

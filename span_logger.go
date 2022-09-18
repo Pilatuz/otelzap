@@ -56,7 +56,7 @@ func (zs zapSpanCore) With(fields []zapcore.Field) zapcore.Core {
 // Check determines whether the supplied Entry should be logged.
 func (zs zapSpanCore) Check(entry zapcore.Entry, checked *zapcore.CheckedEntry) *zapcore.CheckedEntry {
 	if zs.Enabled(entry.Level) {
-		return checked.AddCore(entry, zs)
+		checked = checked.AddCore(entry, zs)
 	}
 
 	return checked
@@ -66,10 +66,10 @@ func (zs zapSpanCore) Check(entry zapcore.Entry, checked *zapcore.CheckedEntry) 
 // writes them to OpenTelemetry as an event.
 func (zs zapSpanCore) Write(entry zapcore.Entry, fields []zapcore.Field) error {
 	zs.span.AddEvent(entry.Message,
-		attributesFromZapFields(zs.with, fields,
+		trace.WithAttributes(attributesFromZapFields(zs.with, fields,
 			attribute.Stringer("zap.level", entry.Level),
 			attribute.String("zap.logger_name", entry.LoggerName),
-		))
+		)...))
 
 	return nil
 }
@@ -77,21 +77,4 @@ func (zs zapSpanCore) Write(entry zapcore.Entry, fields []zapcore.Field) error {
 // Sync flushes buffered logs.
 func (zs zapSpanCore) Sync() error {
 	return nil // nothing to sync
-}
-
-// concatFields concatenates two set of fields.
-func concatFields(a []zapcore.Field, b []zapcore.Field) []zapcore.Field {
-	if len(a) == 0 {
-		return b // first set is empty, return second one
-	}
-	if len(b) == 0 {
-		return a // second set is empty, return first one
-	}
-
-	// concatenate both non-empty sets
-	out := make([]zapcore.Field, 0, len(a)+len(b))
-	out = append(out, a...)
-	out = append(out, b...)
-
-	return out
 }

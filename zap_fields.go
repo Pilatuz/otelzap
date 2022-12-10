@@ -1,11 +1,13 @@
 package otelzap
 
 import (
+	"bytes"
 	"encoding"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"math"
+	"net/http"
 	"reflect"
 	"strconv"
 	"time"
@@ -103,6 +105,29 @@ func appendZapField(attributes []attribute.KeyValue, field zapcore.Field) []attr
 	}
 
 	return append(attributes, Any(field.Key, field.Interface))
+}
+
+// HTTPHeader converts HTTP headers into OpenTelemetry attribute as multi-line string.
+// The HTTP headers to exclude should be in cacnonical form (see textproto.CanonicalMIMEHeaderKey).
+func HTTPHeader(key string, header http.Header, exclude ...string) attribute.KeyValue {
+	var buf bytes.Buffer
+	if err := header.WriteSubset(&buf, excludeMap(exclude)); err != nil { // unlikely
+		return attribute.String(key, err.Error())
+	}
+	return attribute.String(key, buf.String())
+}
+
+// excludeMap build exclusion map
+func excludeMap(keys []string) map[string]bool {
+	if len(keys) == 0 {
+		return nil // empty
+	}
+
+	out := make(map[string]bool, len(keys))
+	for _, k := range keys {
+		out[k] = true
+	}
+	return out
 }
 
 // Any converts unknown type to OpenTelemetry attribute, probably as JSON value.

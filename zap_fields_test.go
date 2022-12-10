@@ -1,6 +1,7 @@
 package otelzap
 
 import (
+	"net/http"
 	"testing"
 	"time"
 
@@ -199,6 +200,32 @@ func TestAttributes(t *testing.T) {
 			nil,
 			attribute.Int("foo", 111),
 		))
+}
+
+// TestHTTPHeader unit tests for HTTPHeader function.
+func TestHTTPHeader(t *testing.T) {
+	assert.Equal(t,
+		attribute.String("foo", ""),
+		HTTPHeader("foo", nil))
+	assert.Equal(t,
+		attribute.String("foo", ""),
+		HTTPHeader("foo", http.Header{}))
+
+	h := http.Header{}
+	h.Add("a", "1")
+	h.Add("b", "2")
+	h.Add("a", "3")
+	assert.Equal(t,
+		attribute.String("foo", "A: 1\r\nA: 3\r\nB: 2\r\n"),
+		HTTPHeader("foo", h))
+
+	h = http.Header{}
+	h.Add("content-type", "application/json")
+	h.Add("authorization", "Bearer ups")
+	h.Add("content-length", "1024")
+	assert.Equal(t,
+		attribute.String("foo", "Content-Length: 1024\r\nContent-Type: application/json\r\n"),
+		HTTPHeader("foo", h, "Authorization"))
 }
 
 // TestConcat unit tests for concatFields function.

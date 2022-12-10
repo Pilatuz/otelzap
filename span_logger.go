@@ -11,6 +11,7 @@ import (
 )
 
 // SpanLogger creates ZAP logger which also writes to OpenTelemetry span.
+// If span is `nil“ or `no-op` then the same logger returned.
 func SpanLogger(span trace.Span, logger *zap.Logger) *zap.Logger {
 	if span == nil || !span.IsRecording() {
 		return logger // no tracing enabled
@@ -47,7 +48,7 @@ func (zs zapSpanCore) Enabled(level zapcore.Level) bool {
 // With adds structured context to the Core.
 func (zs zapSpanCore) With(fields []zapcore.Field) zapcore.Core {
 	return zapSpanCore{
-		core: zs.core, // zs.core.With(fields), - so sense yet
+		core: zs.core, // zs.core.With(fields), - no sense yet
 		span: zs.span,
 		with: concatFields(zs.with, fields),
 	}

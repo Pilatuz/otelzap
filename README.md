@@ -17,10 +17,12 @@ func MyAction(ctx context.Context, foo int) {
     LOG := otelzap.SpanLogger(span, logger)
 
     LOG.Debug("do my action", zap.Int("foo", foo))
+    // will write to stdout as normal zap logger does
+    // and also will add "do my action" event to the span
 }
 ```
 
-The code above will also add OpenTelemetry event with "foo" attribute attached.
+
 
 
 [doc-img]: https://godoc.org/github.com/Pilatuz/otelzap?status.svg

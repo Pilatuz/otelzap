@@ -30,18 +30,18 @@ func attributesFromZapFields(
 	// convert each ZAP field...
 	attrs := make([]attribute.KeyValue, 0, len(with)+len(fields)+len(extra))
 	attrs = append(attrs, extra...) // use extra "as is"
-
-	// convert "with" fields first
-	for _, field := range with {
-		attrs = appendZapField(attrs, field)
-	}
-
-	// then rest of fields
-	for _, field := range fields {
-		attrs = appendZapField(attrs, field)
-	}
+	attrs = AppendZapFields(attrs, with...)
+	attrs = AppendZapFields(attrs, fields...)
 
 	return attrs
+}
+
+// AppendZapFields converts and appends a few ZAP fields.
+func AppendZapFields(attributes []attribute.KeyValue, fields ...zapcore.Field) []attribute.KeyValue {
+	for _, field := range fields {
+		attributes = appendZapField(attributes, field)
+	}
+	return attributes
 }
 
 // appendZapField converts and appends a ZAP field.

@@ -200,6 +200,16 @@ func TestAttributes(t *testing.T) {
 			nil,
 			attribute.Int("foo", 111),
 		))
+
+	assert.Nil(t, AppendZapFields(nil))
+	assert.Equal(t,
+		[]attribute.KeyValue{
+			attribute.Int("foo", 111),
+			attribute.String("bar", "test"),
+		},
+		AppendZapFields(nil,
+			zap.Int("foo", 111),
+			zap.String("bar", "test")))
 }
 
 // TestHTTPHeader unit tests for HTTPHeader function.

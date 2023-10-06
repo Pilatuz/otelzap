@@ -216,10 +216,10 @@ func TestAttributes(t *testing.T) {
 func TestHTTPHeader(t *testing.T) {
 	assert.Equal(t,
 		attribute.String("foo", ""),
-		HTTPHeader("foo", nil))
+		HTTPHeader("foo", nil, nil))
 	assert.Equal(t,
 		attribute.String("foo", ""),
-		HTTPHeader("foo", http.Header{}))
+		HTTPHeader("foo", http.Header{}, nil))
 
 	h := http.Header{}
 	h.Add("a", "1")
@@ -227,7 +227,7 @@ func TestHTTPHeader(t *testing.T) {
 	h.Add("a", "3")
 	assert.Equal(t,
 		attribute.String("foo", "A: 1\r\nA: 3\r\nB: 2\r\n"),
-		HTTPHeader("foo", h))
+		HTTPHeader("foo", h, nil))
 
 	h = http.Header{}
 	h.Add("content-type", "application/json")
@@ -235,7 +235,7 @@ func TestHTTPHeader(t *testing.T) {
 	h.Add("content-length", "1024")
 	assert.Equal(t,
 		attribute.String("foo", "Content-Length: 1024\r\nContent-Type: application/json\r\n"),
-		HTTPHeader("foo", h, "Authorization"))
+		HTTPHeader("foo", h, map[string]bool{"Authorization": true}))
 }
 
 // TestConcat unit tests for concatFields function.

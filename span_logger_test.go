@@ -34,6 +34,18 @@ func TestSpanLogger(t *testing.T) {
 
 	span := mockedSpan{
 		Span: noop.Span{},
+		addEventCb: func(name string, options ...trace.EventOption) {
+			cfg := trace.NewEventConfig(options...)
+			assert.Equal(t, "my message", name)
+			assert.Equal(t,
+				[]attribute.KeyValue{
+					attribute.String("zap.level", "info"),
+					attribute.String("zap.logger_name", "my"),
+					attribute.String("bar", "hello"),
+					attribute.Int("baz", 321),
+					attribute.Int("foo", 123),
+				}, cfg.Attributes())
+		},
 	}
 
 	L2, buf2 := newJSONLogger()
@@ -43,18 +55,6 @@ func TestSpanLogger(t *testing.T) {
 		With(zap.String("bar", "hello")).
 		With(zap.Int("baz", 321))
 
-	span.addEventCb = func(name string, options ...trace.EventOption) {
-		cfg := trace.NewEventConfig(options...)
-		assert.Equal(t, "my message", name)
-		assert.Equal(t,
-			[]attribute.KeyValue{
-				attribute.String("zap.level", "info"),
-				attribute.String("zap.logger_name", "my"),
-				attribute.String("bar", "hello"),
-				attribute.Int("baz", 321),
-				attribute.Int("foo", 123),
-			}, cfg.Attributes())
-	}
 	SL2.Info("my message", zap.Int("foo", 123))
 	SL2.Debug("my message", zap.String("foo", "ignore me"))
 

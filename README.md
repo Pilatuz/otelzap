@@ -1,4 +1,4 @@
-# otelzap [![GoDoc][doc-img]][doc] [![Build Status][ci-img]][ci] [![Coverage Status][cov-img]][cov] [![Go Report Card][reportcard-img]][reportcard]
+# otelzap [![GoDoc][doc-img]][doc] [![Build Status][ci-img]][ci] [![Go Report Card][reportcard-img]][reportcard]
 
 OpenTelemetry integration with ZAP logger.
 
@@ -29,7 +29,5 @@ func MyAction(ctx context.Context, foo int) {
 [doc]: https://godoc.org/github.com/Pilatuz/otelzap
 [ci-img]: https://github.com/Pilatuz/otelzap/actions/workflows/go.yml/badge.svg
 [ci]: https://github.com/Pilatuz/otelzap/actions
-[cov-img]: https://codecov.io/gh/Pilatuz/otelzap/branch/main/graph/badge.svg
-[cov]: https://codecov.io/gh/Pilatuz/otelzap
 [reportcard-img]: https://goreportcard.com/badge/github.com/Pilatuz/otelzap
 [reportcard]: https://goreportcard.com/report/github.com/Pilatuz/otelzap
